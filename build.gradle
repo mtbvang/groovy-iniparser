@@ -1,5 +1,6 @@
 plugins {
     id "com.jfrog.bintray" version "1.2"
+    id 'maven-publish'
 }
 apply plugin: 'groovy'
 apply plugin: 'java'
@@ -9,52 +10,44 @@ mainClassName = 'org.benignbala.iniparser.Main'
 
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-  compile 'org.codehaus.groovy:groovy-all:2.4.3'
-  testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-  testCompile 'junit:junit:4.12'
+    compile 'org.codehaus.groovy:groovy-all:2.4.3'
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+    testCompile 'junit:junit:4.12'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'com.mtbvang'
+            artifactId = 'groovy-iniparser'
+            version = '0.1.0'
+
+            from components.java
+        }
+    }
 }
 
 jar {
-  from {
-    configurations.compile.collect {
-      it.isDirectory() ? it : zipTree(it)
-    }
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
 
-    configurations.runtime.collect {
-      it.isDirectory() ? it : zipTree(it)
-    }
+        configurations.runtime.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
 
-  }
-  manifest {
-    attributes (
-      "Main-Class": "org.benignbala.iniparser.Main",
-      "Class-Path": configurations.compile.collect { it.getName() }.join(' ')
-    )
-  }
+    }
+    manifest {
+        attributes(
+                "Main-Class": "org.benignbala.iniparser.Main",
+                "Class-Path": configurations.compile.collect { it.getName() }.join(' ')
+        )
+    }
 }
 
-bintray {
-  user = "benignbala"
-  key = BINTRAY_API_KEY
-  publish = true
-  filesSpec {
-    from 'build/libs'
-    into 'benignbala/groovy-iniparser'
-  }
-  pkg {
-    repo = "maven"
-    name = "groovy-iniparser"
-    desc = "An INI config file parser implemented in Groovy"
-    licenses = ["Apache-2.0"]
-    vcsUrl = "https://github.com/benignbala/groovy-iniparser.git"
-    publicDownloadNumbers = true
-    version {
-      name = '0.1-alpha'
-      desc = 'First release of the groovy-iniparser plugin'
-    }
-  }
-}
+
